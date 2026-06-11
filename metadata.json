@@ -1,0 +1,8 @@
+{
+  "name": "Spring Boot Playground",
+  "description": "Interactive learning environment and endpoint simulator for Spring Boot REST Controllers, with real-time API client, test suites, and Gemini AI code feedback.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
