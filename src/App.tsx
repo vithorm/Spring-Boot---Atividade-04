@@ -31,9 +31,10 @@ export default function App() {
   const [activeTab, setActiveTab ] = useState<"exercises" | "theory" | "tests">("exercises");
   
   // Custom API Request Form states
-  const [requestUrl, setRequestUrl] = useState<string>("http://localhost:8080/nome");
+  const [requestUrl, setRequestUrl] = useState<string>("http://localhost:8080/aluno");
   const [paramA, setParamA] = useState<string>("10");
-  const [paramB, setParamB] = useState<string>("20");
+  const [paramB, setParamB] = useState<string>("5");
+  const [paramOperacao, setParamOperacao] = useState<string>("soma");
   const [httpResponse, setHttpResponse] = useState<HttpResponse | null>(null);
   const [isSendingRequest, setIsSendingRequest] = useState<boolean>(false);
 
@@ -43,31 +44,30 @@ export default function App() {
   const [aiError, setAiError] = useState<string>("");
 
   // System status metrics computed of active javaCode
-  const [parsedEndpoints, setParsedEndpoints] = useState<string[]>(["/nome"]);
+  const [parsedEndpoints, setParsedEndpoints] = useState<string[]>(["/aluno"]);
 
   // Unit Test tracker state
   const [unitTests, setUnitTests] = useState<UnitTestResult[]>([
-    { id: "t1", name: "GET /nome", description: "Verifica se retorna 'João da Silva'", status: "pending", expected: "João da Silva" },
-    { id: "t2", name: "GET /cpf", description: "Verifica se retorna CPF '123.456.789-00'", status: "pending", expected: "123.456.789-00" },
-    { id: "t3", name: "GET /endereco", description: "Verifica se retorna nome e endereço", status: "pending", expected: "João da Silva - Rua das Flores, 123" },
-    { id: "t4", name: "GET /soma", description: "Verifica se calcula a soma dinâmica do query param", status: "pending", expected: "Soma dinâmica (Ex: a=10&b=20 -> 'Resultado: 30')" },
+    { id: "t1", name: "GET /aluno", description: "Verifica se retorna 'João da Silva' e 'Sistemas de Informação'", status: "pending", expected: "Nome: João da Silva\nCurso: Sistemas de Informação" },
+    { id: "t2", name: "GET /professor", description: "Verifica se retorna 'Ana Paula Canal' e 'Sistemas Operacionais'", status: "pending", expected: "Professor: Ana Paula Canal\nDisciplina: Sistemas Operacionais" },
+    { id: "t3", name: "GET /calculadora", description: "Verifica se calcula as operações de forma dinâmica", status: "pending", expected: "soma: 15, subtracao: 5, multiplicacao: 50, divisao: 2" },
   ]);
 
   // Synchronize parameter strings with URL input box automatically when toggling endpoints
   useEffect(() => {
-    if (selectedExercise.id === "ex4") {
-      setRequestUrl(`http://localhost:8080/soma?a=${paramA}&b=${paramB}`);
+    if (selectedExercise.id === "ex3") {
+      setRequestUrl(`http://localhost:8080/calculadora?a=${paramA}&b=${paramB}&operacao=${paramOperacao}`);
     } else {
       setRequestUrl(`http://localhost:8080${selectedExercise.endpoint}`);
     }
-  }, [selectedExercise, paramA, paramB]);
+  }, [selectedExercise, paramA, paramB, paramOperacao]);
 
   // Read code content to find map routes
   useEffect(() => {
-    const routes = ["/nome"];
-    if (javaCode.includes('"/cpf"')) routes.push("/cpf");
-    if (javaCode.includes('"/endereco"')) routes.push("/endereco");
-    if (javaCode.includes('"/soma"')) routes.push("/soma");
+    const routes = [];
+    if (javaCode.includes('"/aluno"')) routes.push("/aluno");
+    if (javaCode.includes('"/professor"')) routes.push("/professor");
+    if (javaCode.includes('"/calculadora"')) routes.push("/calculadora");
     setParsedEndpoints(routes);
   }, [javaCode]);
 
@@ -82,7 +82,7 @@ export default function App() {
       { id: "init-5", timestamp: new Date().toLocaleTimeString() + ".522", level: "INFO", pid: "34120", thread: "restartedMain", className: "o.a.c.c.StandardEngine", message: "Starting Servlet engine: [Apache Tomcat/9.0.58]" },
       { id: "init-6", timestamp: new Date().toLocaleTimeString() + ".651", level: "INFO", pid: "34120", thread: "restartedMain", className: "o.a.c.c.C.[.[.[/]", message: "Initializing Spring embedded WebApplicationContext" },
       { id: "init-7", timestamp: new Date().toLocaleTimeString() + ".821", level: "INFO", pid: "34120", thread: "restartedMain", className: "o.s.web.context.ContextLoader", message: "Root WebApplicationContext: initialization completed in 1250 ms" },
-      { id: "init-8", timestamp: new Date().toLocaleTimeString() + ".990", level: "INFO", pid: "34120", thread: "restartedMain", className: "o.s.w.s.m.m.a.RequestMappingHandlerMapping", message: "Mapped [GET] \"/nome\" onto public java.lang.String com.bootcamp.exercicio.BootcampController.nome()" },
+      { id: "init-8", timestamp: new Date().toLocaleTimeString() + ".990", level: "INFO", pid: "34120", thread: "restartedMain", className: "o.s.w.s.m.m.a.RequestMappingHandlerMapping", message: "Mapped [GET] \"/aluno\" onto public java.lang.String com.bootcamp.exercicio.BootcampController.aluno()" },
       { id: "init-12", timestamp: new Date().toLocaleTimeString() + ".105", level: "INFO", pid: "34120", thread: "restartedMain", className: "o.s.b.w.e.tomcat.TomcatWebServer", message: "Tomcat started on port(s): 8080 (http) with context path ''" },
       { id: "init-13", timestamp: new Date().toLocaleTimeString() + ".110", level: "INFO", pid: "34120", thread: "restartedMain", className: "com.bootcamp.exercicio.Application", message: "Started Application in 2.14 seconds (JVM running for 2.89)" }
     ];
@@ -131,16 +131,13 @@ export default function App() {
       
       // Print mapped endpoints
       setTimeout(() => {
-        addLog("INFO", "o.s.w.s.m.m.a.RequestMappingHandlerMapping", "Mapped [GET] \"/nome\" onto public java.lang.String com.bootcamp.exercicio.BootcampController.nome()");
+        addLog("INFO", "o.s.w.s.m.m.a.RequestMappingHandlerMapping", "Mapped [GET] \"/aluno\" onto public java.lang.String com.bootcamp.exercicio.BootcampController.aluno()");
         
-        if (javaCode.includes('"/cpf"')) {
-          addLog("INFO", "o.s.w.s.m.m.a.RequestMappingHandlerMapping", "Mapped [GET] \"/cpf\" onto public java.lang.String com.bootcamp.exercicio.BootcampController.cpf()");
+        if (javaCode.includes('"/professor"')) {
+          addLog("INFO", "o.s.w.s.m.m.a.RequestMappingHandlerMapping", "Mapped [GET] \"/professor\" onto public java.lang.String com.bootcamp.exercicio.BootcampController.professor()");
         }
-        if (javaCode.includes('"/endereco"')) {
-          addLog("INFO", "o.s.w.s.m.m.a.RequestMappingHandlerMapping", "Mapped [GET] \"/endereco\" onto public java.lang.String com.bootcamp.exercicio.BootcampController.endereco()");
-        }
-        if (javaCode.includes('"/soma"')) {
-          addLog("INFO", "o.s.w.s.m.m.a.RequestMappingHandlerMapping", "Mapped [GET] \"/soma\" onto public java.lang.String com.bootcamp.exercicio.BootcampController.soma(...)");
+        if (javaCode.includes('"/calculadora"')) {
+          addLog("INFO", "o.s.w.s.m.m.a.RequestMappingHandlerMapping", "Mapped [GET] \"/calculadora\" onto public java.lang.String com.bootcamp.exercicio.BootcampController.calculadora(...)");
         }
       }, 1000);
 
@@ -172,123 +169,155 @@ export default function App() {
     // If server is active, quickly log mapping changes
     if (serverRunning) {
       setTimeout(() => {
-        addLog("INFO", "o.s.w.s.m.m.a.RequestMappingHandlerMapping", "Remapped routes. All Endpoint 1, 2, 3 and 4 (Soma) are now active!");
+        addLog("INFO", "o.s.w.s.m.m.a.RequestMappingHandlerMapping", "Remapped routes. All Exercícios 1 (Aluno), 2 (Professor) and 3 (Calculadora) are now active!");
       }, 200);
     }
   };
 
   const handleAutoSolveTest = (testId: string) => {
     let updatedCode = javaCode;
-    if (testId === "t2") {
+    if (testId === "t1") {
       updatedCode = updatedCode.replace(
-        "ADICIONE_SEU_CPF_AQUI",
-        "123.456.789-00"
+        "ADICIONE_DADOS_DO_ALUNO_AQUI",
+        "Nome: João da Silva\\nCurso: Sistemas de Informação"
       );
-      addLog("INFO", "com.bootcamp.exercicio.Application", "Endpoint 2 (/cpf) implementado com sucesso!");
+      addLog("INFO", "com.bootcamp.exercicio.Application", "Exercício 1 (/aluno) resolvido!");
+    } else if (testId === "t2") {
+      updatedCode = updatedCode.replace(
+        "ADICIONE_DADOS_DO_PROFESSOR_AQUI",
+        "Professor: Ana Paula Canal\\nDisciplina: Sistemas Operacionais"
+      );
+      addLog("INFO", "com.bootcamp.exercicio.Application", "Exercício 2 (/professor) resolvido!");
     } else if (testId === "t3") {
-      updatedCode = updatedCode.replace(
-        "ADICIONE_SEU_ENDERECO_AQUI",
-        "João da Silva - Rua das Flores, 123"
-      );
-      addLog("INFO", "com.bootcamp.exercicio.Application", "Endpoint 3 (/endereco) implementado com sucesso!");
-    } else if (testId === "t4") {
-      if (updatedCode.includes("public String soma()")) {
+      if (updatedCode.includes("public String calculadora()")) {
         updatedCode = updatedCode.replace(
-          `public String soma() {\n        // TODO: Adicione os parâmetros necessários no método (@RequestParam)\n        // e implemente a lógica de soma dinâmica.\n        return "ADICIONE_A_LOGICA_DE_SOMA_AQUI";\n    }`,
-          `public String soma(@RequestParam(name = "a") int a, @RequestParam(name = "b") int b) {\n        int resultado = a + b;\n        return "Resultado: " + resultado;\n    }`
+          `public String calculadora() {\n        // TODO: Adicione os parâmetros necessários no método (@RequestParam)\n        // e implemente a lógica condicional (if ou switch) para as operações matemáticas.\n        return "ADICIONE_A_LOGICA_DA_CALCULADORA_AQUI";\n    }`,
+          `public String calculadora(\n            @RequestParam(name = "a") double a, \n            @RequestParam(name = "b") double b, \n            @RequestParam(name = "operacao") String operacao) {\n            \n        double resultado = 0;\n        \n        switch (operacao.toLowerCase()) {\n            case "soma":\n                resultado = a + b;\n                break;\n            case "subtracao":\n                resultado = a - b;\n                break;\n            case "multiplicacao":\n                resultado = a * b;\n                break;\n            case "divisao":\n                if (b == 0) {\n                    return "Erro: Divisão por zero!";\n                }\n                resultado = a / b;\n                break;\n            default:\n                return "Operação inválida!";\n        }\n        \n        if (resultado == (long) resultado) {\n            return "Resultado: " + (long) resultado;\n        } else {\n            return "Resultado: " + resultado;\n        }\n    }`
         );
       } else {
-        // Fallback replacement of placeholder and standard parameter injection
+        // Fallback replacements
         updatedCode = updatedCode.replace(
-          "public String soma()",
-          "public String soma(@RequestParam(name = \"a\") int a, @RequestParam(name = \"b\") int b)"
+          "public String calculadora()",
+          "public String calculadora(@RequestParam double a, @RequestParam double b, @RequestParam String operacao)"
         );
         updatedCode = updatedCode.replace(
-          `return "ADICIONE_A_LOGICA_DE_SOMA_AQUI";`,
-          `int resultado = a + b;\n        return "Resultado: " + resultado;`
+          `return "ADICIONE_A_LOGICA_DA_CALCULADORA_AQUI";`,
+          `double resultado = 0;
+        switch (operacao.toLowerCase()) {
+            case "soma": resultado = a + b; break;
+            case "subtracao": resultado = a - b; break;
+            case "multiplicacao": resultado = a * b; break;
+            case "divisao": 
+                if (b == 0) return "Erro: Divisão por zero!";
+                resultado = a / b; 
+                break;
+            default: return "Operação inválida!";
+        }
+        if (resultado == (long) resultado) {
+            return "Resultado: " + (long) resultado;
+        } else {
+            return "Resultado: " + resultado;
+        }`
         );
       }
-      addLog("INFO", "com.bootcamp.exercicio.Application", "Endpoint 4 (/soma) com parâmetros e soma dinâmica implementado!");
+      addLog("INFO", "com.bootcamp.exercicio.Application", "Exercício 3 (/calculadora) resolvido!");
     }
     setJavaCode(updatedCode);
   };
 
   // Helper logic parser: processes simulated Java code execution
   const simulateJavaExecution = (path: string, params: Record<string, string>): { status: number; body: string } => {
-    // Basic regex extractors for static strings and simple arithmetic
     try {
-      const cleanCode = javaCode.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, ""); // Strip comments for easier regex matching
-
-      // Endpoint 1: GET /nome
-      if (path === "/nome") {
-        const match = javaCode.match(/public\s+String\s+nome\s*\(\s*\)[\s\S]*?return\s+["']([^"']+)["']/);
-        if (match) {
-          return { status: 200, body: match[1] };
+      // Endpoint 1: GET /aluno
+      if (path === "/aluno") {
+        if (!javaCode.includes('"/aluno"')) {
+          return { status: 404, body: "Error 404: Not Found - Mapeamento para '/aluno' não encontrado no Controller." };
         }
-        return { status: 200, body: "João da Silva" }; // Fallback to professor default
-      }
-
-      // Endpoint 2: GET /cpf
-      if (path === "/cpf") {
-        if (!javaCode.includes('"/cpf"')) {
-          return { status: 404, body: "Error 404: Not Found - Mapeamento para '/cpf' não encontrado no Controller." };
-        }
-        const match = javaCode.match(/public\s+String\s+cpf\s*\(\s*\)[\s\S]*?return\s+["']([^"']+)["']/);
+        const match = javaCode.match(/public\s+String\s+aluno\s*\(\s*\)[\s\S]*?return\s+["']([\s\S]*?)["'];/);
         if (match) {
           const value = match[1];
-          if (value === "ADICIONE_SEU_CPF_AQUI") {
-            return { status: 200, body: "AVISO: Você precisa preencher o CPF fictício na rotina return!" };
+          if (value === "ADICIONE_DADOS_DO_ALUNO_AQUI") {
+            return { status: 200, body: "AVISO: Você precisa preencher os dados do aluno fictício na rotina return!" };
           }
-          return { status: 200, body: value };
+          // Replace escaped backslashes or physical \n
+          return { status: 200, body: value.replace(/\\n/g, "\n") };
         }
-        return { status: 500, body: "Error 500: Erro de Compilação interno no método cpf(). Verifique a sintaxe Java." };
+        return { status: 500, body: "Error 500: Erro de Compilação interno no método aluno(). Verifique a sintaxe Java." };
       }
 
-      // Endpoint 3: GET /endereco
-      if (path === "/endereco") {
-        if (!javaCode.includes('"/endereco"')) {
-          return { status: 404, body: "Error 404: Not Found - Mapeamento para '/endereco' não encontrado." };
+      // Endpoint 2: GET /professor
+      if (path === "/professor") {
+        if (!javaCode.includes('"/professor"')) {
+          return { status: 404, body: "Error 404: Not Found - Mapeamento para '/professor' não encontrado no Controller." };
         }
-        const match = javaCode.match(/public\s+String\s+endereco\s*\(\s*\)[\s\S]*?return\s+["']([^"']+)["']/);
+        const match = javaCode.match(/public\s+String\s+professor\s*\(\s*\)[\s\S]*?return\s+["']([\s\S]*?)["'];/);
         if (match) {
           const value = match[1];
-          if (value === "ADICIONE_SEU_ENDERECO_AQUI") {
-            return { status: 200, body: "AVISO: Você precisa substituir o seu endereço fictício!" };
+          if (value === "ADICIONE_DADOS_DO_PROFESSOR_AQUI") {
+            return { status: 200, body: "AVISO: Você precisa preencher os dados do professor fictício na rotina return!" };
           }
-          return { status: 200, body: value };
+          return { status: 200, body: value.replace(/\\n/g, "\n") };
         }
-        return { status: 500, body: "Error 500: Falha ao compilar ou resolver o método endereco()." };
+        return { status: 500, body: "Error 500: Erro de Compilação interno no método professor(). Verifique a sintaxe Java." };
       }
 
-      // Endpoint 4: GET /soma
-      if (path === "/soma") {
-        if (!javaCode.includes('"/soma"')) {
-          return { status: 404, body: "Error 404: Not Found - Rota '/soma' não mapeada." };
+      // Endpoint 3: GET /calculadora
+      if (path === "/calculadora") {
+        if (!javaCode.includes('"/calculadora"')) {
+          return { status: 404, body: "Error 404: Not Found - Rota '/calculadora' não mapeada." };
         }
         
-        // Parse input numbers
-        const aNum = parseInt(params.a);
-        const bNum = parseInt(params.b);
+        // Parse input parameters
+        const aVal = params.a;
+        const bVal = params.b;
+        const operacao = params.operacao;
+
+        if (aVal === undefined || bVal === undefined || !operacao) {
+          return { status: 400, body: "Resultado: Erro de Parâmetros. Envie ?a=valor&b=valor&operacao=soma na URL." };
+        }
+
+        const aNum = parseFloat(aVal);
+        const bNum = parseFloat(bVal);
 
         if (isNaN(aNum) || isNaN(bNum)) {
-          return { status: 400, body: "Resultado: Erro de Parâmetros. Envie variáveis válidas ?a=valor&b=valor na URL." };
+          return { status: 400, body: "Resultado: Erro de Parâmetros. Os valores de 'a' e 'b' devem ser numéricos." };
         }
 
         // Basic verification for presence of RequestParam and real calculation logic 
         const hasParamAnnotation = javaCode.includes("@RequestParam");
-        const containsPlaceholder = javaCode.includes("ADICIONE_A_LOGICA_DE_SOMA_AQUI");
+        const containsPlaceholder = javaCode.includes("ADICIONE_A_LOGICA_DA_CALCULADORA_AQUI");
 
         if (containsPlaceholder) {
-          return { status: 200, body: "ADICIONE_A_LOGICA_DE_SOMA_AQUI (Preencha os argumentos e faça a soma)" };
+          return { status: 200, body: "ADICIONE_A_LOGICA_DA_CALCULADORA_AQUI (Preencha os argumentos e faça as operações)" };
         }
 
         if (!hasParamAnnotation) {
           return { status: 200, body: "Soma estática: Você esqueceu do @RequestParam nos argumentos!" };
         }
 
-        // Calculate dynamic response as intended
-        const resultSum = aNum + bNum;
-        return { status: 200, body: `Resultado: ${resultSum}` };
+        let resultado = 0;
+        switch (operacao.toLowerCase()) {
+          case "soma":
+            resultado = aNum + bNum;
+            break;
+          case "subtracao":
+            resultado = aNum - bNum;
+            break;
+          case "multiplicacao":
+            resultado = aNum * bNum;
+            break;
+          case "divisao":
+            if (bNum === 0) {
+              return { status: 200, body: "Erro: Divisão por zero!" };
+            }
+            resultado = aNum / bNum;
+            break;
+          default:
+            return { status: 200, body: "Operação inválida!" };
+        }
+
+        const formattedResult = resultado === Math.floor(resultado) ? String(resultado) : String(parseFloat(resultado.toFixed(6)));
+        return { status: 200, body: `Resultado: ${formattedResult}` };
       }
 
       return { status: 404, body: `Error 404: Endpoint '${path}' não mapeado.` };
@@ -353,26 +382,32 @@ export default function App() {
           let success = false;
 
           if (test.id === "t1") {
-            const res = simulateJavaExecution("/nome", {});
+            const res = simulateJavaExecution("/aluno", {});
             actualValue = res.body;
-            success = res.status === 200 && actualValue === "João da Silva";
+            success = res.status === 200 && 
+                      actualValue.includes("Nome: João da Silva") && 
+                      actualValue.includes("Curso: Sistemas de Informação");
           } else if (test.id === "t2") {
-            const res = simulateJavaExecution("/cpf", {});
+            const res = simulateJavaExecution("/professor", {});
             actualValue = res.body;
-            success = res.status === 200 && actualValue === "123.456.789-00";
+            success = res.status === 200 && 
+                      actualValue.includes("Professor: Ana Paula Canal") && 
+                      actualValue.includes("Disciplina: Sistemas Operacionais");
           } else if (test.id === "t3") {
-            const res = simulateJavaExecution("/endereco", {});
-            actualValue = res.body;
-            success = res.status === 200 && actualValue === "João da Silva - Rua das Flores, 123";
-          } else if (test.id === "t4") {
-            // Test multiple inputs to guarantee it's highly dynamic!
-            const res1 = simulateJavaExecution("/soma", { a: "10", b: "20" });
-            const res2 = simulateJavaExecution("/soma", { a: "99", b: "1" });
+            // Test multiple inputs to guarantee it's highly dynamic and correct!
+            const resSoma = simulateJavaExecution("/calculadora", { a: "10", b: "5", operacao: "soma" });
+            const resSub = simulateJavaExecution("/calculadora", { a: "10", b: "5", operacao: "subtracao" });
+            const resMult = simulateJavaExecution("/calculadora", { a: "10", b: "5", operacao: "multiplicacao" });
+            const resDiv = simulateJavaExecution("/calculadora", { a: "10", b: "5", operacao: "divisao" });
+            const resInvalida = simulateJavaExecution("/calculadora", { a: "10", b: "5", operacao: "potencia" });
+
+            actualValue = `soma: "${resSoma.body}"\nsub: "${resSub.body}"\nmult: "${resMult.body}"\ndiv: "${resDiv.body}"\ninvalida: "${resInvalida.body}"`;
             
-            actualValue = `a=10&b=20 -> "${res1.body}";\n  a=99&b=1  -> "${res2.body}"`;
-            success = res1.status === 200 && 
-                      res1.body === "Resultado: 30" && 
-                      res2.body === "Resultado: 100";
+            success = resSoma.status === 200 && resSoma.body === "Resultado: 15" &&
+                      resSub.status === 200 && resSub.body === "Resultado: 5" &&
+                      resMult.status === 200 && resMult.body === "Resultado: 50" &&
+                      resDiv.status === 200 && resDiv.body === "Resultado: 2" &&
+                      resInvalida.status === 200 && resInvalida.body === "Operação inválida!";
           }
 
           return {
@@ -743,9 +778,9 @@ export default function App() {
                     </button>
                   </div>
 
-                  {/* Dynamic request configuration parameters (Only for soma endpoint 4) */}
-                  {selectedExercise.id === "ex4" && (
-                    <div className="grid grid-cols-2 gap-3 p-3 bg-white rounded-lg border border-slate-100">
+                  {/* Dynamic request configuration parameters (Only for calculadora endpoint 3) */}
+                  {selectedExercise.id === "ex3" && (
+                    <div className="grid grid-cols-3 gap-2.5 p-3 bg-white rounded-lg border border-slate-100">
                       <div>
                         <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
                           Parâmetro a
@@ -769,6 +804,23 @@ export default function App() {
                           value={paramB}
                           onChange={(e) => setParamB(e.target.value)}
                         />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
+                          Operação
+                        </label>
+                        <select
+                          id="param-operacao-select"
+                          className="w-full bg-slate-50 border border-slate-200 rounded px-2.5 py-1 text-xs font-sans text-slate-800"
+                          value={paramOperacao}
+                          onChange={(e) => setParamOperacao(e.target.value)}
+                        >
+                          <option value="soma">Soma</option>
+                          <option value="subtracao">Subtração</option>
+                          <option value="multiplicacao">Multiplicação</option>
+                          <option value="divisao">Divisão</option>
+                          <option value="potencia">Potência (Inválida)</option>
+                        </select>
                       </div>
                     </div>
                   )}
